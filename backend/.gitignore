@@ -1,0 +1,48 @@
+# Dependency directories
+node_modules/
+jspm_packages/
+web_modules/
+
+# Local configuration files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# Diagnostic reports and dumps
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+core
+*.cpuprofile
+*.heapprofile
+*.heapsnapshot
+
+# Operating System files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Build directories
+dist/
+build/
+out/
+.next/
+.nuxt/
