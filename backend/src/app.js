@@ -27,9 +27,11 @@ app.use(requestTracer);
 // 1. GLOBAL SECURITY MIDDLEWARES
 app.use(helmet()); // Set headers for vulnerability mitigation (XSS, Clickjacking, etc.)
 app.use(cors({
-  origin: env.nodeEnv === 'production' ? false : '*', // Restrict in production, allow all in dev
+  origin: (origin, callback) => {
+    callback(null, origin || '*');
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-trace-id'],
   credentials: true,
 }));
 
