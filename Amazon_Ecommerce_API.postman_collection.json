@@ -1,0 +1,773 @@
+{
+  "info": {
+    "_postman_id": "amazon-ecommerce-api-collection",
+    "name": "Amazon E-Commerce API",
+    "description": "Complete API collection for Amazon E-Commerce Backend built with Node.js, Express and MongoDB Atlas.\n\n**Base URL:** `http://localhost:5001/api/v1`\n\n**Auth:** Login first and the token is auto-saved to environment variable `access_token`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5001/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🏥 Health",
+      "item": [
+        {
+          "name": "Basic Health Check",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/health", "host": ["{{base_url}}"], "path": ["health"] },
+            "description": "Basic liveness check. Returns server uptime and environment."
+          }
+        },
+        {
+          "name": "Detailed Health Check",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/health/detailed", "host": ["{{base_url}}"], "path": ["health", "detailed"] },
+            "description": "Returns server status + MongoDB connection state."
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Raushan Kumar\",\n  \"email\": \"raushan@example.com\",\n  \"password\": \"Raushan@123\",\n  \"role\": \"customer\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Register a new user. Role can be: customer, seller, admin"
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.accessToken) {",
+                  "  pm.environment.set('access_token', res.data.accessToken);",
+                  "  console.log('✅ Token saved!');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"raushan@example.com\",\n  \"password\": \"Raushan@123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Login and get access token. Token is auto-saved to {{access_token}} environment variable."
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/auth/refresh", "host": ["{{base_url}}"], "path": ["auth", "refresh"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"your_refresh_token_here\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Get a new access token using the refresh token."
+          }
+        }
+      ]
+    },
+    {
+      "name": "📦 Products",
+      "item": [
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products?page=1&limit=10&minPrice=100&maxPrice=5000&minRating=3&inStock=true&sortBy=price&sortOrder=asc",
+              "host": ["{{base_url}}"],
+              "path": ["products"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "category", "value": "", "disabled": true },
+                { "key": "minPrice", "value": "100" },
+                { "key": "maxPrice", "value": "5000" },
+                { "key": "minRating", "value": "3" },
+                { "key": "inStock", "value": "true" },
+                { "key": "sortBy", "value": "price" },
+                { "key": "sortOrder", "value": "asc" }
+              ]
+            },
+            "description": "List all products with optional filters and pagination."
+          }
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/products/:id", "host": ["{{base_url}}"], "path": ["products", ":id"], "variable": [{ "key": "id", "value": "PRODUCT_ID_HERE" }] },
+            "description": "Get a single product by its MongoDB _id."
+          }
+        },
+        {
+          "name": "Get Related Products",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/products/:id/related", "host": ["{{base_url}}"], "path": ["products", ":id", "related"], "variable": [{ "key": "id", "value": "PRODUCT_ID_HERE" }] },
+            "description": "Get related products by category."
+          }
+        },
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/products", "host": ["{{base_url}}"], "path": ["products"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Wireless Headphones Pro\",\n  \"description\": \"Premium noise-cancelling over-ear wireless headphones with 30hr battery\",\n  \"price\": 2999,\n  \"discountPercentage\": 10,\n  \"stock\": 50,\n  \"category\": \"CATEGORY_ID_HERE\",\n  \"images\": [\"https://example.com/headphones.jpg\"]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Create a new product. Requires Seller or Admin role."
+          }
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/products/:id", "host": ["{{base_url}}"], "path": ["products", ":id"], "variable": [{ "key": "id", "value": "PRODUCT_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 2599,\n  \"stock\": 45,\n  \"discountPercentage\": 15\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Update product details. Seller can only update own products."
+          }
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/products/:id", "host": ["{{base_url}}"], "path": ["products", ":id"], "variable": [{ "key": "id", "value": "PRODUCT_ID_HERE" }] },
+            "description": "Delete a product. Admin only."
+          }
+        }
+      ]
+    },
+    {
+      "name": "🗂️ Categories",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/categories", "host": ["{{base_url}}"], "path": ["categories"] },
+            "description": "Get full category tree. Public endpoint."
+          }
+        },
+        {
+          "name": "Get Category by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/categories/:id", "host": ["{{base_url}}"], "path": ["categories", ":id"], "variable": [{ "key": "id", "value": "CATEGORY_ID_HERE" }] }
+          }
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/categories", "host": ["{{base_url}}"], "path": ["categories"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Electronics\",\n  \"slug\": \"electronics\",\n  \"description\": \"All electronic items and gadgets\",\n  \"parentCategory\": null\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Create a new category. Admin only."
+          }
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/categories/:id", "host": ["{{base_url}}"], "path": ["categories", ":id"], "variable": [{ "key": "id", "value": "CATEGORY_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Electronics & Gadgets\",\n  \"description\": \"Updated category description\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/categories/:id", "host": ["{{base_url}}"], "path": ["categories", ":id"], "variable": [{ "key": "id", "value": "CATEGORY_ID_HERE" }] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📋 Orders",
+      "item": [
+        {
+          "name": "Place New Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/orders", "host": ["{{base_url}}"], "path": ["orders"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"product\": \"PRODUCT_ID_HERE\",\n      \"quantity\": 2\n    }\n  ],\n  \"shippingAddress\": {\n    \"street\": \"123 MG Road\",\n    \"city\": \"Bengaluru\",\n    \"state\": \"Karnataka\",\n    \"pincode\": \"560001\",\n    \"country\": \"India\"\n  },\n  \"paymentMethod\": \"UPI\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Place a new order. Stock is checked and decremented automatically."
+          }
+        },
+        {
+          "name": "Get All Orders",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/orders?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["orders"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "status", "value": "pending", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/orders/:id", "host": ["{{base_url}}"], "path": ["orders", ":id"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] }
+          }
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/orders/:id/status", "host": ["{{base_url}}"], "path": ["orders", ":id", "status"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"shipped\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Status flow: pending → confirmed → shipped → delivered / cancelled"
+          }
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/orders/:id", "host": ["{{base_url}}"], "path": ["orders", ":id"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "description": "Cancel order. Stock is auto-restored if cancelled before shipping."
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 Customers",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/customers/profile", "host": ["{{base_url}}"], "path": ["customers", "profile"] }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/customers/profile", "host": ["{{base_url}}"], "path": ["customers", "profile"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Raushan Kumar\",\n  \"phone\": \"9876543210\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get Addresses",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/customers/addresses", "host": ["{{base_url}}"], "path": ["customers", "addresses"] }
+          }
+        },
+        {
+          "name": "Add Address",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/customers/addresses", "host": ["{{base_url}}"], "path": ["customers", "addresses"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"label\": \"Home\",\n  \"street\": \"456 Park Street\",\n  \"city\": \"Patna\",\n  \"state\": \"Bihar\",\n  \"pincode\": \"800001\",\n  \"country\": \"India\",\n  \"isDefault\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Update Address",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/customers/addresses/:id", "host": ["{{base_url}}"], "path": ["customers", "addresses", ":id"], "variable": [{ "key": "id", "value": "ADDRESS_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"city\": \"Patna\",\n  \"pincode\": \"800002\",\n  \"isDefault\": false\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Delete Address",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/customers/addresses/:id", "host": ["{{base_url}}"], "path": ["customers", "addresses", ":id"], "variable": [{ "key": "id", "value": "ADDRESS_ID_HERE" }] }
+          }
+        },
+        {
+          "name": "Get Wishlist",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/customers/wishlist", "host": ["{{base_url}}"], "path": ["customers", "wishlist"] }
+          }
+        },
+        {
+          "name": "Add to Wishlist",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/customers/wishlist/:pid", "host": ["{{base_url}}"], "path": ["customers", "wishlist", ":pid"], "variable": [{ "key": "pid", "value": "PRODUCT_ID_HERE" }] }
+          }
+        },
+        {
+          "name": "Remove from Wishlist",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/customers/wishlist/:pid", "host": ["{{base_url}}"], "path": ["customers", "wishlist", ":pid"], "variable": [{ "key": "pid", "value": "PRODUCT_ID_HERE" }] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏪 Sellers",
+      "item": [
+        {
+          "name": "Get Seller Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/sellers/profile", "host": ["{{base_url}}"], "path": ["sellers", "profile"] }
+          }
+        },
+        {
+          "name": "Update Seller Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/sellers/profile", "host": ["{{base_url}}"], "path": ["sellers", "profile"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storeName\": \"Raushan's Store\",\n  \"storeDescription\": \"Best electronics at lowest price\",\n  \"phone\": \"9876543210\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get Seller Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/sellers/dashboard?startDate=2024-01-01&endDate=2024-12-31",
+              "host": ["{{base_url}}"],
+              "path": ["sellers", "dashboard"],
+              "query": [
+                { "key": "startDate", "value": "2024-01-01" },
+                { "key": "endDate", "value": "2024-12-31" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Seller Products",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/sellers/products?page=1&limit=10", "host": ["{{base_url}}"], "path": ["sellers", "products"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
+          }
+        },
+        {
+          "name": "Get Seller Orders",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/sellers/orders?page=1&limit=10", "host": ["{{base_url}}"], "path": ["sellers", "orders"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
+          }
+        },
+        {
+          "name": "Update Fulfillment Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/sellers/orders/:id/status", "host": ["{{base_url}}"], "path": ["sellers", "orders", ":id", "status"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"shipped\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📊 Inventory",
+      "item": [
+        {
+          "name": "Get All Inventory",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/inventory?page=1&limit=20", "host": ["{{base_url}}"], "path": ["inventory"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "20" }] }
+          }
+        },
+        {
+          "name": "Get Product Stock",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/inventory/:productId", "host": ["{{base_url}}"], "path": ["inventory", ":productId"], "variable": [{ "key": "productId", "value": "PRODUCT_ID_HERE" }] }
+          }
+        },
+        {
+          "name": "Update Stock",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/inventory/:productId", "host": ["{{base_url}}"], "path": ["inventory", ":productId"], "variable": [{ "key": "productId", "value": "PRODUCT_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 100\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Bulk Update Stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/inventory/bulk-update", "host": ["{{base_url}}"], "path": ["inventory", "bulk-update"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"updates\": [\n    { \"productId\": \"PRODUCT_ID_1\", \"quantity\": 50 },\n    { \"productId\": \"PRODUCT_ID_2\", \"quantity\": 30 }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get Low Stock Products",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/inventory/low-stock?threshold=10", "host": ["{{base_url}}"], "path": ["inventory", "low-stock"], "query": [{ "key": "threshold", "value": "10" }] },
+            "description": "Returns products with stock below the threshold. Default threshold is 10."
+          }
+        }
+      ]
+    },
+    {
+      "name": "📈 Analytics",
+      "item": [
+        {
+          "name": "Revenue Stats",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/analytics/revenue?startDate=2024-01-01&endDate=2024-12-31",
+              "host": ["{{base_url}}"],
+              "path": ["analytics", "revenue"],
+              "query": [{ "key": "startDate", "value": "2024-01-01" }, { "key": "endDate", "value": "2024-12-31" }]
+            }
+          }
+        },
+        {
+          "name": "Order Volume Stats",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/analytics/orders?startDate=2024-01-01&endDate=2024-12-31",
+              "host": ["{{base_url}}"],
+              "path": ["analytics", "orders"],
+              "query": [{ "key": "startDate", "value": "2024-01-01" }, { "key": "endDate", "value": "2024-12-31" }]
+            }
+          }
+        },
+        {
+          "name": "Top Selling Products",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/analytics/top-products?limit=5&sortBy=revenue",
+              "host": ["{{base_url}}"],
+              "path": ["analytics", "top-products"],
+              "query": [{ "key": "limit", "value": "5" }, { "key": "sortBy", "value": "revenue" }]
+            },
+            "description": "sortBy can be: revenue or quantity"
+          }
+        },
+        {
+          "name": "Sales Trends",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/analytics/trends?groupBy=day&startDate=2024-01-01&endDate=2024-12-31",
+              "host": ["{{base_url}}"],
+              "path": ["analytics", "trends"],
+              "query": [{ "key": "groupBy", "value": "day" }, { "key": "startDate", "value": "2024-01-01" }, { "key": "endDate", "value": "2024-12-31" }]
+            },
+            "description": "groupBy can be: day, week, or month"
+          }
+        },
+        {
+          "name": "Average Order Value",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/analytics/avg-order-value?startDate=2024-01-01&endDate=2024-12-31",
+              "host": ["{{base_url}}"],
+              "path": ["analytics", "avg-order-value"],
+              "query": [{ "key": "startDate", "value": "2024-01-01" }, { "key": "endDate", "value": "2024-12-31" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔍 Search",
+      "item": [
+        {
+          "name": "Search Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/search?q=wireless headphones&page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["search"],
+              "query": [
+                { "key": "q", "value": "wireless headphones" },
+                { "key": "category", "value": "", "disabled": true },
+                { "key": "minPrice", "value": "", "disabled": true },
+                { "key": "maxPrice", "value": "", "disabled": true },
+                { "key": "minRating", "value": "", "disabled": true },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            },
+            "description": "Full-text search with optional filters. Public endpoint."
+          }
+        },
+        {
+          "name": "Search Suggestions (Autocomplete)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/search/suggestions?q=wirel",
+              "host": ["{{base_url}}"],
+              "path": ["search", "suggestions"],
+              "query": [{ "key": "q", "value": "wirel" }]
+            },
+            "description": "Returns autocomplete suggestions based on prefix. Public endpoint."
+          }
+        }
+      ]
+    },
+    {
+      "name": "🛡️ Admin",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/admin/users?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "users"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                { "key": "role", "value": "seller", "disabled": true }
+              ]
+            },
+            "description": "Admin only. List all users with optional role filter."
+          }
+        },
+        {
+          "name": "Change User Role",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/admin/users/:id/role", "host": ["{{base_url}}"], "path": ["admin", "users", ":id", "role"], "variable": [{ "key": "id", "value": "USER_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"seller\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Ban / Unban User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/admin/users/:id/ban", "host": ["{{base_url}}"], "path": ["admin", "users", ":id", "ban"], "variable": [{ "key": "id", "value": "USER_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"banned\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get Pending Sellers",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/admin/sellers/pending", "host": ["{{base_url}}"], "path": ["admin", "sellers", "pending"] }
+          }
+        },
+        {
+          "name": "Approve / Reject Seller",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/admin/sellers/:id/approve", "host": ["{{base_url}}"], "path": ["admin", "sellers", ":id", "approve"], "variable": [{ "key": "id", "value": "SELLER_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approved\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Force Remove Product",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/admin/products/:id", "host": ["{{base_url}}"], "path": ["admin", "products", ":id"], "variable": [{ "key": "id", "value": "PRODUCT_ID_HERE" }] }
+          }
+        },
+        {
+          "name": "Platform Overview Stats",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/admin/stats", "host": ["{{base_url}}"], "path": ["admin", "stats"] },
+            "description": "Returns total users, sellers, products, orders, and platform revenue."
+          }
+        }
+      ]
+    }
+  ]
+}
