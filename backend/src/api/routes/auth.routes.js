@@ -8,6 +8,7 @@ const router = Router();
 // Public Authentication Endpoints
 router.post('/register', authController.register);
 router.post('/login', authController.login);
+router.post('/refresh', authController.refresh);
 
 // Protected Core Session Endpoints
 router.get('/me', authenticate, authController.getMe);
