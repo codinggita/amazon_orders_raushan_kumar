@@ -4,65 +4,65 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    --background: 160 30% 4%;
+    --foreground: 160 5% 98%;
 
-    --card: 240 10% 4.5%;
-    --card-foreground: 0 0% 98%;
+    --card: 160 25% 6%;
+    --card-foreground: 160 5% 98%;
 
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 160 30% 4%;
+    --popover-foreground: 160 5% 98%;
 
-    --primary: 250 85% 65%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 162 84% 45%; /* High-fidelity Emerald Green */
+    --primary-foreground: 160 10% 4%;
 
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 160 15% 12%;
+    --secondary-foreground: 160 5% 98%;
 
-    --muted: 240 3.7% 12%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 160 15% 10%;
+    --muted-foreground: 160 5% 60%;
 
-    --accent: 250 85% 65%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 24 95% 58%; /* Attentive Coral Amber complementary */
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 345 85% 55%; /* Deep Rose accent */
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 3.7% 14%;
-    --input: 240 3.7% 14%;
-    --ring: 250 85% 65%;
+    --border: 160 15% 12%;
+    --input: 160 15% 12%;
+    --ring: 162 84% 45%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
   }
 
   .light {
-    --background: 240 5% 98%;
-    --foreground: 240 10% 3.9%;
+    --background: 160 20% 98%;
+    --foreground: 160 35% 6%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 160 35% 6%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover-foreground: 160 35% 6%;
 
-    --primary: 250 80% 55%;
+    --primary: 162 84% 38%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
+    --secondary: 160 12% 95%;
+    --secondary-foreground: 160 30% 12%;
 
-    --muted: 240 4.8% 90%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --muted: 160 10% 90%;
+    --muted-foreground: 160 15% 45%;
 
-    --accent: 250 80% 55%;
-    --accent-foreground: 240 5.9% 10%;
+    --accent: 24 95% 50%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 345 85% 50%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 250 80% 55%;
+    --border: 160 15% 90%;
+    --input: 160 15% 90%;
+    --ring: 162 84% 38%;
   }
 }
 
@@ -150,4 +150,65 @@
 
 .animate-float {
   animation: float 4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes breatheGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.03);
+    border-color: rgba(255, 255, 255, 0.03);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.15);
+  }
+}
+
+.animate-breathe-glow {
+  animation: breatheGlow 4s ease-in-out infinite;
+}
+
+@keyframes spin-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-spin-gradient {
+  background-size: 200% 200%;
+  animation: spin-gradient 3s linear infinite;
+}
+
+@keyframes slideUpFade {
+  0% {
+    transform: translateY(6px);
+    opacity: 0;
+  }
+  15%, 85% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-6px);
+    opacity: 0;
+  }
+}
+
+.animate-slide-up-fade {
+  animation: slideUpFade 2.5s ease-in-out infinite;
 }
