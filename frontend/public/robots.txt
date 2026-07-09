@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Allow: /products
+Allow: /login
+Allow: /register
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /profile
+Disallow: /cart
+Disallow: /checkout
+Disallow: /my-orders
+Disallow: /my-orders/*
+Disallow: /seller/*
+
+Sitemap: https://cartx.com/sitemap.xml
