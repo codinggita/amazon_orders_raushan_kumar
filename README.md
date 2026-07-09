@@ -49,19 +49,84 @@ amazon_orders_raushan_kumar/
 ├── backend/                                    # Enterprise Backend Engine (Node.js/Express)
 │   ├── src/
 │   │   ├── api/                                # HTTP Routing and Request Orchestration
-│   │   ├── domain/                             # Core Enterprise Business Rules & MongoDB queries
-│   │   ├── infrastructure/                     # Technical Adapters & Database Engines (Redis, Atlas)
-│   │   ├── middlewares/                        # Express HTTP Pipeline Middlewares (RBAC, JWT)
-│   │   └── seed/                               # Database Ingestion & Seeding adaptation
-│   │
+│   │   │   ├── controllers/                    # Adapters converting HTTP requests to Domain logic
+│   │   │   │   ├── admin.controller.js         # User suspensions and system metric lookups
+│   │   │   │   ├── analytics.controller.js     # Sales facets and geolocation grouping logic
+│   │   │   │   ├── auth.controller.js          # Authentication (signups, passwords, logins)
+│   │   │   │   ├── category.controller.js      # Taxonomy category node creations & lookups
+│   │   │   │   ├── customer.controller.js      # Shopper profiles and personal transaction history
+│   │   │   │   ├── health.controller.js        # Server and database ping health checks
+│   │   │   │   ├── inventory.controller.js     # Stock metrics and manual stock level overrides
+│   │   │   │   ├── order.controller.js         # Checkout execution and payment webhooks
+│   │   │   │   ├── product.controller.js       # Paginated catalog multi-filter searches
+│   │   │   │   └── seller.controller.js        # Merchant directories and storefront analytics
+│   │   │   └── routes/                         # Express Routers mapping endpoints to controllers
+│   │   ├── configs/                            # Environment-specific Configurations (.env parsers)
+│   │   ├── domain/                             # Core Enterprise Business Rules
+│   │   │   ├── repositories/                   # Layer-isolated Mongoose database commands
+│   │   │   │   ├── category.repository.js      # Category taxonomy tree materialized paths
+│   │   │   │   ├── customer.repository.js      # Customer accounts lookups & soft-deletes
+│   │   │   │   ├── order.repository.js         # Order database writes and state machine updates
+│   │   │   │   ├── product.repository.js       # Products queries & atomic stock reservations
+│   │   │   │   ├── seller.repository.js        # Merchant performance metrics database scans
+│   │   │   │   └── user.repository.js          # User security profile operations (RBAC)
+│   │   │   └── services/                       # Application Workflow Services Orchestration
+│   │   │       ├── admin.service.js            # User suspensions and backend OS diagnostics
+│   │   │       ├── analytics.service.js        # High-performance analytical MongoDB aggregations
+│   │   │       ├── auth.service.js             # Password hashing, JWT token generation
+│   │   │       ├── category.service.js         # Array generations for taxonomy tree branches
+│   │   │       ├── customer.service.js         # Shopper listings compilation
+│   │   │       ├── inventory.service.js        # Manual inventory overrides
+│   │   │       ├── order.service.js            # Multi-item checkout distributed locking
+│   │   │       ├── product.service.js          # Catalog paginated search engines
+│   │   │       ├── search.service.js           # Multi-entity search indexing and typo-tolerance
+│   │   │       └── seller.service.js           # Merchant performance calculations
+│   │   ├── infrastructure/                     # Technical Adapters & Database Engines
+│   │   │   ├── database/                       # MongoDB Cloud Atlas Connection Pooling
+│   │   │   └── logger/                         # Winston Structured Logging (RFC 5424)
+│   │   ├── middlewares/                        # Express HTTP Pipeline Middlewares
+│   │   │   ├── auth.middleware.js              # Token decryptions and Role RBAC guards
+│   │   │   └── trace.middleware.js             # UUID request trace injectors for logging
+│   │   └── seed/                               # Database Ingestion & Testing Mockers
+│   │       ├── importDatasetCsv.js             # High-performance JSON-to-CSV database seeder
+│   │       └── seed.js                         # Bootstraps SuperAdmin and default mock data
+│   └── app.js                                  # Express instantiation and global security helmet
+│
 ├── frontend/                                   # Commerce Analytics & Storefront Client (React/Vite)
 │   ├── src/
-│   │   ├── components/                         # Reusable UI components (Toast, Modals)
-│   │   ├── layouts/                            # Routing Layout wrappers (ShopperLayout, AdminLayout)
-│   │   ├── pages/                              # Core screens (Landing, Catalog, Auth, Admin)
-│   │   ├── services/                           # Axios API integration layers
-│   │   └── store/                              # Zustand global state management
-│   └── public/                                 # Static SEO assets (robots.txt, sitemap, manifest)
+│   │   ├── components/                         # Reusable UI presentation layers
+│   │   │   ├── Toast.jsx                       # Global floating notification HUD manager
+│   │   │   └── HeroBackground.jsx              # Cinematic glowing particle animations
+│   │   ├── layouts/                            # Outer structural routing wrappers
+│   │   │   ├── AdminLayout.jsx                 # Sidebar navigation for staff and analytics
+│   │   │   └── ShopperLayout.jsx               # Navigation bar and footer for public storefront
+│   │   ├── pages/                              # Core interactive UI screens
+│   │   │   ├── AdminAnalytics.jsx              # High-charts visualization of sales facets
+│   │   │   ├── AdminCategories.jsx             # Taxonomy tree management UI
+│   │   │   ├── AdminDashboard.jsx              # Executive metrics overview dashboard
+│   │   │   ├── AdminMetrics.jsx                # Server OS and database latency monitors
+│   │   │   ├── AdminOrders.jsx                 # Order fulfillment and status progression table
+│   │   │   ├── AdminProducts.jsx               # Catalog inventory addition and pricing management
+│   │   │   ├── AdminUsers.jsx                  # IAM user suspension and directory
+│   │   │   ├── AuthPages.jsx                   # Sign In, Registration, and Password Reset screens
+│   │   │   ├── LandingPage.jsx                 # Cinematic entry point for the CartX platform
+│   │   │   ├── NotFound.jsx                    # 404 Fallback routing for lost navigations
+│   │   │   ├── ShopperCatalog.jsx              # Multi-filter paginated product discovery grid
+│   │   │   ├── ShopperProductDetails.jsx       # Individual product specification and checkout injection
+│   │   │   └── WarehouseOverrides.jsx          # Direct manual stock quantity mutations for staff
+│   │   ├── services/                           # Network boundary configuration
+│   │   │   ├── api.js                          # Configured Axios instance with JWT interceptors
+│   │   │   └── resourceApi.js                  # Pre-compiled fetch hooks for React Query
+│   │   ├── store/                              # Global frontend state machines (Zustand)
+│   │   │   ├── useAuthStore.js                 # Session tracking and role capabilities
+│   │   │   └── useCartStore.js                 # Local storage persistent shopping cart
+│   │   ├── App.jsx                             # React Router definition map and entry DOM tree
+│   │   └── main.jsx                            # React root injection and HelmetProvider wrapper
+│   └── public/                                 # Static web server assets
+│       ├── manifest.json                       # Progressive Web App installation definitions
+│       ├── robots.txt                          # Search engine bot crawl directives
+│       ├── sitemap.xml                         # XML priority mapping for SEO indexing
+│       └── cartx-logo.png                      # The primary CartX visual identity branding
 ```
 
 ---
