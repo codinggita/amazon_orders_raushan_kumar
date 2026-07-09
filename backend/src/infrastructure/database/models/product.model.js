@@ -71,6 +71,10 @@ const productSchema = new mongoose.Schema(
         value: { type: Number, default: 0 },
         unit: { type: String, default: 'kg' },
       },
+      images: {
+        type: [String],
+        default: [],
+      },
       variants: [
         {
           variantId: { type: String, required: true },
