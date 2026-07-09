@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { Helmet } from 'react-helmet-async';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search, Filter, ArrowUpDown, ChevronLeft, ChevronRight, SlidersHorizontal, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 export const ShopperCatalog = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -14,6 +16,7 @@ export const ShopperCatalog = () => {
   const [maxPrice, setMaxPrice] = useState('');
   const [sortBy, setSortBy] = useState('popularity');
   const [page, setPage] = useState(1);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const limit = 9;
 
   const { data: categoriesData } = useQuery({
@@ -35,21 +38,22 @@ export const ShopperCatalog = () => {
       const res = await api.get('/products', {
         params: {
           search: search || undefined,
-          category: selectedCategory || undefined,
-          brand: selectedBrand || undefined,
+          categoryId: selectedCategory || undefined,
+          brandId: selectedBrand || undefined,
           minPrice: minPrice || undefined,
           maxPrice: maxPrice || undefined,
-          sort: sortParam,
+          sortField: sortBy.startsWith('price') ? 'price' : 'popularity',
+          sortOrder: sortBy === 'price_asc' ? 'asc' : 'desc',
           page,
           limit
         }
       });
-      return res.data?.data || { docs: [], totalDocs: 0, totalPages: 1 };
+      return res.data;
     }
   });
 
-  const productsList = productsData?.docs || [];
-  const totalPages = productsData?.totalPages || 1;
+  const productsList = productsData?.data || [];
+  const totalPages = productsData?.pagination?.pages || 1;
   const categories = categoriesData || [];
 
   const brands = ['Apex Audio', 'Apex Computers', 'Global', 'Germany', 'USA'];
@@ -66,12 +70,30 @@ export const ShopperCatalog = () => {
 
   return (
     <div className="flex-1 flex flex-col gap-6">
+      <Helmet>
+        <title>Catalog - CartX | Discover Premium Gear</title>
+        <meta name="description" content="Browse the full CartX catalog. Zero-latency searches, dynamic filtering, and live inventory sync." />
+        
+        {/* Open Graph Tags for Social Media */}
+        <meta property="og:title" content="Catalog - CartX | Discover Premium Gear" />
+        <meta property="og:description" content="Browse the full CartX catalog. Zero-latency searches, dynamic filtering, and live inventory sync." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://cartx.com/products" />
+        <meta property="og:image" content="https://cartx.com/cartx-logo.png" />
+        
+        {/* Twitter Card Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Catalog - CartX | Discover Premium Gear" />
+        <meta name="twitter:description" content="Browse the full CartX catalog. Zero-latency searches, dynamic filtering, and live inventory sync." />
+        <meta name="twitter:image" content="https://cartx.com/cartx-logo.png" />
+      </Helmet>
+
       <div className="relative overflow-hidden rounded-2xl glass-panel p-8 md:p-12 border border-white/5 flex flex-col items-center justify-center text-center gap-4">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-indigo-500/10 pointer-events-none" />
         <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-wider">
-          <Sparkles className="w-3 h-3" /> Intelligence Catalog Discovery
+          <Sparkles className="w-3 h-3" /> Cart<span className="text-primary drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]">X</span> Catalog Discovery
         </span>
-        <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">Explore Our Commerce Engine</h1>
+        <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">Explore Our Cart<span className="text-primary drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]">X</span> Engine</h1>
         <p className="text-gray-400 text-sm max-w-lg">
           Zero-latency searches, dynamic filtering adjustments, and live inventory sync queries directly to MongoDB.
         </p>
@@ -94,8 +116,17 @@ export const ShopperCatalog = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        <div className="lg:col-span-1 flex flex-col gap-6">
-          <div className="glass-panel border border-white/5 rounded-2xl p-6 flex flex-col gap-6">
+        <div className="lg:col-span-1 flex flex-col gap-4">
+          {/* Mobile Filter Toggle */}
+          <button 
+            onClick={() => setShowMobileFilters(!showMobileFilters)}
+            className="lg:hidden w-full flex items-center justify-center gap-2 bg-primary/10 border border-primary/30 text-primary font-bold py-3 rounded-2xl transition-all active:scale-95 shadow-[0_0_15px_rgba(16,185,129,0.15)]"
+          >
+            <Filter className="w-5 h-5" />
+            {showMobileFilters ? 'Hide Filters' : 'Show Filters'}
+          </button>
+
+          <div className={`${showMobileFilters ? 'flex' : 'hidden'} lg:flex glass-panel border border-white/5 rounded-2xl p-6 flex-col gap-6`}>
             <div className="flex items-center justify-between border-b border-white/5 pb-4">
               <span className="font-semibold text-white text-sm flex items-center gap-2">
                 <Filter className="w-4 h-4 text-primary" /> Filter Options
@@ -233,11 +264,21 @@ export const ShopperCatalog = () => {
                       className="group glass-panel border border-white/5 hover:border-white/10 rounded-2xl p-5 flex flex-col justify-between gap-4 cursor-pointer transition-all shadow-md hover:-translate-y-1 hover:shadow-primary/5"
                     >
                       <div>
-                        <div className="h-40 w-full bg-gradient-to-br from-indigo-950/20 to-black rounded-xl border border-white/5 flex items-center justify-center relative overflow-hidden">
-                          <div className="absolute inset-0 bg-radial-gradient group-hover:scale-105 transition-transform duration-500" />
-                          <span className="text-[10px] text-gray-500 uppercase tracking-widest font-semibold relative z-10">
-                            {product.brand.name}
-                          </span>
+                        <div className="h-40 w-full bg-slate-900 rounded-xl border border-white/5 flex items-center justify-center relative overflow-hidden">
+                          {product.core.images && product.core.images.length > 0 ? (
+                            <img 
+                              src={product.core.images[0]} 
+                              alt={product.core.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                          ) : (
+                            <>
+                              <div className="absolute inset-0 bg-radial-gradient group-hover:scale-105 transition-transform duration-500" />
+                              <span className="text-[10px] text-gray-500 uppercase tracking-widest font-semibold relative z-10">
+                                {product.brand.name}
+                              </span>
+                            </>
+                          )}
                           {product.brand.isPremium && (
                             <span className="absolute top-2 right-2 px-2 py-0.5 rounded bg-primary/20 text-[8px] font-bold text-primary border border-primary/20 uppercase tracking-wider">
                               Premium
