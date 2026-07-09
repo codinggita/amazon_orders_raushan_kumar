@@ -68,6 +68,7 @@ class ProductService {
         dimensions: core.dimensions,
         material: core.material,
         weight: core.weight,
+        images: core.images || [],
         variants: core.variants || []
       },
       category: {
