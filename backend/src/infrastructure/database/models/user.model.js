@@ -62,6 +62,18 @@ const userSchema = new mongoose.Schema(
       type: [String],
       default: ['CREATE_ORDER', 'VIEW_PRODUCTS'], // Basic user scopes
     },
+    companyName: {
+      type: String,
+      trim: true,
+    },
+    taxId: {
+      type: String,
+      trim: true,
+    },
+    categoryFocus: {
+      type: String,
+      trim: true,
+    },
     accountStatus: {
       type: String,
       enum: ['ACTIVE', 'SUSPENDED', 'PENDING_VERIFICATION'],
