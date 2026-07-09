@@ -12,13 +12,24 @@ class AuthController {
    */
   register = async (req, res, next) => {
     try {
-      const { email, password, firstName, lastName } = req.body;
+      const { email, password, firstName, lastName, role, companyName, taxId, categoryFocus, staffRole, invitationCode } = req.body;
       
       if (!email || !password || !firstName || !lastName) {
         throw new ApiError(400, 'All registration fields (email, password, firstName, lastName) are required.', 'VALIDATION_FAILED');
       }
+      
+      // Basic staff security check (can be moved to service, but controller handles incoming req validation)
+      if (role === 'STAFF') {
+        const expectedCode = process.env.STAFF_INVITE_CODE || 'STAFF_SECURE_123';
+        if (invitationCode !== expectedCode) {
+          throw new ApiError(403, 'Invalid staff invitation code. Registration denied.', 'FORBIDDEN');
+        }
+      }
 
-      const user = await authService.signup({ email, password, firstName, lastName });
+      const user = await authService.signup({ 
+        email, password, firstName, lastName, role, 
+        companyName, taxId, categoryFocus, staffRole 
+      });
       
       res.status(201).json(
         new ApiResponse(201, user, 'User registration completed successfully.')

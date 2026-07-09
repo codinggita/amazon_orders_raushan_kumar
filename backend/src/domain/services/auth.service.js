@@ -14,7 +14,7 @@ class AuthService {
    * @param {Object} input - Sign up details
    */
   async signup(input) {
-    const { email, password, firstName, lastName, role } = input;
+    const { email, password, firstName, lastName, role, companyName, taxId, categoryFocus, staffRole } = input;
     
     // Check if user already exists
     const existingUser = await userRepository.findByEmail(email);
@@ -25,18 +25,36 @@ class AuthService {
     // Construct high-entropy userId prefix to avoid sequential guess attacks
     const userId = `usr_${crypto.randomUUID().replace(/-/g, '')}`;
     
-    // Default roles to CUSTOMER. Prevent security elevation unless explicitly configured
-    const userRole = role && ['ADMIN', 'SUPER_ADMIN', 'SELLER'].includes(role) ? 'CUSTOMER' : (role || 'CUSTOMER');
+    // Determine exact role
+    let finalRole = 'CUSTOMER';
+    if (role === 'SELLER') finalRole = 'SELLER';
+    else if (role === 'STAFF' && ['INVENTORY_MANAGER', 'ANALYTICS_MANAGER'].includes(staffRole)) {
+      finalRole = staffRole;
+    }
     
-    const user = await userRepository.create({
+    // Determine permissions
+    let permissions = ['CREATE_ORDER', 'VIEW_PRODUCTS'];
+    if (finalRole === 'SELLER') permissions.push('MANAGE_OWN_PRODUCTS', 'VIEW_SELLER_DASHBOARD');
+    if (finalRole === 'INVENTORY_MANAGER') permissions.push('MANAGE_INVENTORY', 'VIEW_INVENTORY_DASHBOARD');
+    if (finalRole === 'ANALYTICS_MANAGER') permissions.push('VIEW_ANALYTICS', 'VIEW_REPORTS');
+    
+    const userData = {
       userId,
       email: email.toLowerCase(),
       password,
       firstName,
       lastName,
-      role: userRole,
-      permissions: userRole === 'CUSTOMER' ? ['CREATE_ORDER', 'VIEW_PRODUCTS'] : ['VIEW_PRODUCTS']
-    });
+      role: finalRole,
+      permissions
+    };
+
+    if (finalRole === 'SELLER') {
+      userData.companyName = companyName;
+      userData.taxId = taxId;
+      userData.categoryFocus = categoryFocus;
+    }
+
+    const user = await userRepository.create(userData);
     
     return {
       userId: user.userId,
