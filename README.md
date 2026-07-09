@@ -1,114 +1,140 @@
-# 🛒 Amazon Commerce & Analytics Intelligence Platform
+<div align="center">
+  <img src="./docs/assets/cartx-hero-v3.png" alt="CartX Platform Hero" width="100%" style="border-radius: 12px; margin-bottom: 20px;" />
+  
+  # 🛒 CartX - Premium E-Commerce Orchestration
 
-Welcome to the **Amazon Commerce & Analytics Intelligence Platform**—a high-performance, production-grade distributed system designed to deliver real-time commerce dashboard metrics, atomic inventory control, and enterprise-grade user lifecycle tracking. 
+  <p align="center">
+    A high-performance, production-grade distributed system designed to deliver real-time commerce dashboard metrics, atomic inventory control, and enterprise-grade user lifecycle tracking.
+  </p>
 
-Built using a **Strict Clean Layered Architecture** with Node.js, Express.js, and MongoDB Atlas, this repository houses both the robust transactional backend service and the integrated analytics dashboard UI.
+  <p align="center">
+    <img src="https://img.shields.io/badge/Node.js-18.x-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node" />
+    <img src="https://img.shields.io/badge/React-18.x-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" />
+    <img src="https://img.shields.io/badge/Vite-5.x-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
+    <img src="https://img.shields.io/badge/Tailwind_CSS-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind" />
+    <img src="https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB" />
+  </p>
+</div>
 
 ---
 
-## 🏗️ 1. Project Directory & Architecture Blueprint
+## 🌟 Executive Summary
 
-Below is the complete, comprehensive directory mapping of every engineered component of this distributed system, showcasing pure isolation of business rules from database adapters and HTTP delivery routers:
+Built using a **Strict Clean Layered Architecture** with Node.js, Express.js, and MongoDB Atlas on the backend, and a stunning, high-performance React (Vite) Single Page Application on the frontend. The CartX platform houses both a robust transactional backend service and a visually striking, consumer-facing storefront and analytics dashboard UI.
 
-```
+<img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop" alt="Analytics Dashboard" width="100%" style="border-radius: 12px; margin-top: 10px;" />
+
+---
+
+## 🚀 Enterprise Core Technical Features
+
+### Backend Engine
+* **High-Performance Ingestion Engine**: Dynamically converts raw JSON records containing **21,629 orders** into a standardized CSV file, parsing it line-by-line using a custom quote-tolerant parser, and seeding MongoDB Atlas in highly optimized chunked batches.
+* **Atomic Stock Booking Engine**: Employs two-phase stock locking checks in MongoDB using atomic `$inc` operators to mitigate concurrency race conditions, featuring automatic transaction rollbacks on failures to prevent catalog leaks.
+* **Observability & Request Tracing**: Cryptographic trace ID generation (`crypto.randomUUID()`) injected automatically in each HTTP request context for instant transactional diagnostics.
+
+### Frontend Storefront
+* **Zero-Latency Interactions**: Integrated with `@tanstack/react-query` for ultra-fast, cached data fetching, paginated catalog scrolling, and dynamic state management.
+* **Modern Premium UI/UX**: Utilizing Tailwind CSS and Framer Motion, the CartX platform features a state-of-the-art "billion-dollar tech giant" aesthetic. Complete with glassmorphism panels, dynamic glows, and micro-interactions.
+* **SEO & PWA Ready**: Fully optimized with `react-helmet-async` for dynamic meta tags (Open Graph & Twitter Cards), `sitemap.xml`, Google Rich Snippets (JSON-LD), and Web App Manifests for progressive mobile installation.
+
+---
+
+## 🏗️ System Architecture Blueprint
+
+<img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2070&auto=format&fit=crop" alt="System Architecture" width="100%" style="border-radius: 12px; margin-top: 10px;" />
+
+```text
 amazon_orders_raushan_kumar/
 ├── backend/                                    # Enterprise Backend Engine (Node.js/Express)
 │   ├── src/
 │   │   ├── api/                                # HTTP Routing and Request Orchestration
-│   │   │   ├── controllers/                    # Business adapters converting requests to ApiResponses
+│   │   │   ├── controllers/                    # Adapters converting HTTP requests to Domain logic
 │   │   │   │   ├── admin.controller.js         # User suspensions and system metric lookups
-│   │   │   │   ├── analytics.controller.js     # Dashboards, category sales, geographic splits
+│   │   │   │   ├── analytics.controller.js     # Sales facets and geolocation grouping logic
 │   │   │   │   ├── auth.controller.js          # Authentication (signups, passwords, logins)
 │   │   │   │   ├── category.controller.js      # Taxonomy category node creations & lookups
 │   │   │   │   ├── customer.controller.js      # Shopper profiles and personal transaction history
-│   │   │   │   ├── health.controller.js        # Server and database health checks
+│   │   │   │   ├── health.controller.js        # Server and database ping health checks
 │   │   │   │   ├── inventory.controller.js     # Stock metrics and manual stock level overrides
-│   │   │   │   ├── order.controller.js         # Two-phase checkout orders execution
+│   │   │   │   ├── order.controller.js         # Checkout execution and payment webhooks
 │   │   │   │   ├── product.controller.js       # Paginated catalog multi-filter searches
 │   │   │   │   └── seller.controller.js        # Merchant directories and storefront analytics
-│   │   │   └── routes/                         # API Gateway Routers mapping routes to controllers
-│   │   │       ├── admin.routes.js             # Secure system admin routes
-│   │   │       ├── analytics.routes.js         # Sales & analytical routes
-│   │   │       ├── auth.routes.js              # Shopper auth routes
-│   │   │       ├── category.routes.js          # Product taxonomy routes
-│   │   │       ├── customer.routes.js          # Customer profiles routes
-│   │   │       ├── health.routes.js            # Diagnostics routes
-│   │   │       ├── inventory.routes.js         # Warehousing inventory routes
-│   │   │       ├── order.routes.js             # Checkout orders transactional routes
-│   │   │       ├── product.routes.js           # Products catalog routes
-│   │   │       ├── search.routes.js            # High-speed open search routes
-│   │   │       └── seller.routes.js            # Sellers storefront routes
-│   │   │
-│   │   ├── configs/                            # Environment-specific Configurations
-│   │   │   └── env.config.js                   # Schema validations for MONGODB_URI and JWT keys
-│   │   │
+│   │   │   └── routes/                         # Express Routers mapping endpoints to controllers
+│   │   ├── configs/                            # Environment-specific Configurations (.env parsers)
 │   │   ├── domain/                             # Core Enterprise Business Rules
 │   │   │   ├── repositories/                   # Layer-isolated Mongoose database commands
-│   │   │   │   ├── category.repository.js      # Category taxonomy tree queries
+│   │   │   │   ├── category.repository.js      # Category taxonomy tree materialized paths
 │   │   │   │   ├── customer.repository.js      # Customer accounts lookups & soft-deletes
-│   │   │   │   ├── order.repository.js         # Order database writes and status updates
-│   │   │   │   ├── product.repository.js       # Products catalog queries & atomic stock reservations
+│   │   │   │   ├── order.repository.js         # Order database writes and state machine updates
+│   │   │   │   ├── product.repository.js       # Products queries & atomic stock reservations
 │   │   │   │   ├── seller.repository.js        # Merchant performance metrics database scans
-│   │   │   │   └── user.repository.js          # User security profile operations
+│   │   │   │   └── user.repository.js          # User security profile operations (RBAC)
 │   │   │   └── services/                       # Application Workflow Services Orchestration
-│   │   │       ├── admin.service.js            # User suspensions and backend diagnostics
-│   │   │       ├── analytics.service.js        # High-performance analytical facet streams
-│   │   │       ├── auth.service.js             # Password matches, token generation, signup flows
-│   │   │       ├── category.service.js         # Path array generations for taxonomy branches
+│   │   │       ├── admin.service.js            # User suspensions and backend OS diagnostics
+│   │   │       ├── analytics.service.js        # High-performance analytical MongoDB aggregations
+│   │   │       ├── auth.service.js             # Password hashing, JWT token generation
+│   │   │       ├── category.service.js         # Array generations for taxonomy tree branches
 │   │   │       ├── customer.service.js         # Shopper listings compilation
-│   │   │       ├── inventory.service.js        # Manual availableStock updates
-│   │   │       ├── order.service.js            # Multi-item checkout rolls & rollbacks
-│   │   │       ├── product.service.js          # Products catalog paginated query filters
-│   │   │       ├── search.service.js           # Multi-entity search across orders/products
+│   │   │       ├── inventory.service.js        # Manual inventory overrides
+│   │   │       ├── order.service.js            # Multi-item checkout distributed locking
+│   │   │       ├── product.service.js          # Catalog paginated search engines
+│   │   │       ├── search.service.js           # Multi-entity search indexing and typo-tolerance
 │   │   │       └── seller.service.js           # Merchant performance calculations
-│   │   │
 │   │   ├── infrastructure/                     # Technical Adapters & Database Engines
-│   │   │   ├── cache/                          # Redis-ready Cache Adaptors
-│   │   │   │   └── index.js                    # Redis client featuring localized InMemory fallback
-│   │   │   ├── database/                       # MongoDB Cloud Atlas Pools
-│   │   │   │   ├── index.js                    # Database connection hub
-│   │   │   │   ├── mongoose.js                 # Mongoose settings and connection events
-│   │   │   │   └── models/                     # High-fidelity Database Schemas
-│   │   │   │       ├── category.model.js       # Taxonomy categories with path nested hierarchy
-│   │   │   │       ├── order.model.js          # Immutable orders with deep snapshots
-│   │   │   │       ├── product.model.js        # Products catalog with dynamic pre-validate pricing
-│   │   │   │       └── user.model.js           # IAM user model with brute-force lockout hooks
-│   │   │   └── logger/                         # Winston Structured Log adapters
-│   │   │       └── index.js                    # RFC 5424 aligned multi-level streams console log
-│   │   │
+│   │   │   ├── database/                       # MongoDB Cloud Atlas Connection Pooling
+│   │   │   └── logger/                         # Winston Structured Logging (RFC 5424)
 │   │   ├── middlewares/                        # Express HTTP Pipeline Middlewares
-│   │   │   ├── auth.middleware.js              # Token decryptions and Role RBAC checks
-│   │   │   └── trace.middleware.js             # UUID request trace injectors
-│   │   │
-│   │   ├── seed/                               # Database Ingestion & Seeding adaptation
-│   │   │   ├── importDatasetCsv.js             # High-performance JSON-to-CSV database seeder
-│   │   │   └── seed.js                         # Mock test dataset generator
-│   │   │
-│   │   ├── app.js                              # express instantiation and global security boundaries
-│   │   └── server.js                           # DB bootstrap and OS process event monitors
-│   │
-│   ├── .env                                    # Active cloud environment configurations
-│   ├── .env.example                            # Blueprint environment configuration
-│   ├── package.json                            # Package management dependencies & boot scripts
-│   └── README.md                               # Dedicated backend documentation
+│   │   │   ├── auth.middleware.js              # Token decryptions and Role RBAC guards
+│   │   │   └── trace.middleware.js             # UUID request trace injectors for logging
+│   │   └── seed/                               # Database Ingestion & Testing Mockers
+│   │       ├── importDatasetCsv.js             # High-performance JSON-to-CSV database seeder
+│   │       └── seed.js                         # Bootstraps SuperAdmin and default mock data
+│   └── app.js                                  # Express instantiation and global security helmet
 │
-└── frontend/                                   # Commerce Analytics Dashboard Client
+├── frontend/                                   # Commerce Analytics & Storefront Client (React/Vite)
+│   ├── src/
+│   │   ├── components/                         # Reusable UI presentation layers
+│   │   │   ├── Toast.jsx                       # Global floating notification HUD manager
+│   │   │   └── HeroBackground.jsx              # Cinematic glowing particle animations
+│   │   ├── layouts/                            # Outer structural routing wrappers
+│   │   │   ├── AdminLayout.jsx                 # Sidebar navigation for staff and analytics
+│   │   │   └── ShopperLayout.jsx               # Navigation bar and footer for public storefront
+│   │   ├── pages/                              # Core interactive UI screens
+│   │   │   ├── AdminAnalytics.jsx              # High-charts visualization of sales facets
+│   │   │   ├── AdminCategories.jsx             # Taxonomy tree management UI
+│   │   │   ├── AdminDashboard.jsx              # Executive metrics overview dashboard
+│   │   │   ├── AdminMetrics.jsx                # Server OS and database latency monitors
+│   │   │   ├── AdminOrders.jsx                 # Order fulfillment and status progression table
+│   │   │   ├── AdminProducts.jsx               # Catalog inventory addition and pricing management
+│   │   │   ├── AdminUsers.jsx                  # IAM user suspension and directory
+│   │   │   ├── AuthPages.jsx                   # Sign In, Registration, and Password Reset screens
+│   │   │   ├── LandingPage.jsx                 # Cinematic entry point for the CartX platform
+│   │   │   ├── NotFound.jsx                    # 404 Fallback routing for lost navigations
+│   │   │   ├── ShopperCatalog.jsx              # Multi-filter paginated product discovery grid
+│   │   │   ├── ShopperProductDetails.jsx       # Individual product specification and checkout injection
+│   │   │   └── WarehouseOverrides.jsx          # Direct manual stock quantity mutations for staff
+│   │   ├── services/                           # Network boundary configuration
+│   │   │   ├── api.js                          # Configured Axios instance with JWT interceptors
+│   │   │   └── resourceApi.js                  # Pre-compiled fetch hooks for React Query
+│   │   ├── store/                              # Global frontend state machines (Zustand)
+│   │   │   ├── useAuthStore.js                 # Session tracking and role capabilities
+│   │   │   └── useCartStore.js                 # Local storage persistent shopping cart
+│   │   ├── App.jsx                             # React Router definition map and entry DOM tree
+│   │   └── main.jsx                            # React root injection and HelmetProvider wrapper
+│   └── public/                                 # Static web server assets
+│       ├── manifest.json                       # Progressive Web App installation definitions
+│       ├── robots.txt                          # Search engine bot crawl directives
+│       ├── sitemap.xml                         # XML priority mapping for SEO indexing
+│       └── cartx-logo.png                      # The primary CartX visual identity branding
 ```
 
 ---
 
-## 🚀 2. Enterprise Core Technical Features
+## 🔑 Cloud Database & Environment Configuration
 
-* **High-Performance Ingestion Engine**: Dynamically converts raw JSON records (`Amazon_Orders.json` containing **21,629 orders**) into a standardized, quote-escaped CSV file, parses it line-by-line using a custom quote-tolerant parser, and seeds **MongoDB Atlas** cloud collections in highly optimized chunked batches.
-* **Observability & Request Correlation Tracking**: Cryptographic trace ID generation (`crypto.randomUUID()`) injected automatically in each HTTP request context, outputting trace stamps (`[TraceID: x-trace-id]`) in Winston logs to achieve instant transactional diagnostics.
-* **Atomic Stock Booking engine**: Employs two-phase stock locking checks in MongoDB using atomic `$inc` operators to mitigate concurrency race conditions, featuring automatic transaction rollbacks on failures to prevent catalog leaks.
-* **Granular Role-Based Access Control (RBAC)**: Secure routes protected by JWT tokens and specialized authorization permissions (e.g. `MANAGE_INVENTORY` for staff stock overrides, `VIEW_ANALYTICS` for intelligence metrics).
-
----
-
-## 🔑 3. Cloud Database Configuration
-
-The backend is configured to connect directly to **MongoDB Atlas**. Create a `.env` file in the `backend/` root directory:
+### Backend Setup
+Create a `.env` file in the `backend/` root directory:
 
 ```env
 PORT=5001
@@ -122,11 +148,6 @@ JWT_SECRET=commerce_intelligence_local_development_jwt_secret_key_998877
 JWT_ACCESS_EXPIRATION=15m
 JWT_REFRESH_EXPIRATION=7d
 BCRYPT_SALT_ROUNDS=12
-
-# Rate Limits & Logs
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=100
-LOG_LEVEL=debug
 ```
 
 ### 👤 Global Administrator Access Credentials
@@ -136,96 +157,48 @@ Logging in as Admin grants immediate access to all administrative and business i
 
 ---
 
-## 📡 4. REST API Endpoint Directory (48 Endpoints)
+## 📡 REST API Endpoint Overview (48 Endpoints)
 
-All endpoints are mapped under the `/api/v1` namespace.
+All backend endpoints are mapped under the `/api/v1` namespace and strictly follow RESTful conventions.
 
-### Domain 1: Observability & Health
-* `GET /health` — Server health ping.
-* `GET /health/db` — Live cloud database connection ping & latency metrics.
-
-### Domain 2: Identity Management (IAM)
-* `POST /auth/register` — Signup new shopper accounts.
-* `POST /auth/login` — Login and fetch JWT access authorization token.
-* `GET /auth/me` — Resolve active shopper profile details.
-* `PATCH /auth/change-password` — Change password.
-
-### Domain 3 & 4: Products Catalog & Categories Taxonomy
-* `GET /products` — Paginated catalog listing with search query parameters (`?search=`, `?brand=`, `?category=`, `?minPrice=`, `?maxPrice=`).
-* `POST /products` — Add a product to the catalog.
-* `GET /products/:productId` — Get product specs.
-* `PATCH /products/:productId` — Edit catalog product details.
-* `DELETE /products/:productId` — Soft-delete a product.
-* `GET /categories` — List taxonomy hierarchical divisions.
-* `POST /categories` — Insert new branch category node.
-* `GET /categories/:categoryId` — Category detail lookup.
-* `PATCH /categories/:categoryId` — Update category branch path.
-* `DELETE /categories/:categoryId` — Remove category branch node.
-
-### Domain 5 & 6: Customers & Sellers Stores
-* `GET /customers` — Administrative paginated shoppers directory.
-* `GET /customers/:customerId` — Shopper details.
-* `PATCH /customers/:customerId` — Shopper profile updates.
-* `DELETE /customers/:customerId` — Shopper account deactivation (soft-deletes).
-* `GET /customers/:customerId/orders` — Shopper transaction history logs.
-* `GET /sellers` — Active merchants storefront directory.
-* `GET /sellers/:sellerId` — Store performance details.
-* `GET /sellers/:sellerId/products` — Store product catalog lists.
-* `GET /sellers/:sellerId/analytics` — Store sales performance benchmarks.
-
-### Domain 7 & 8: Orders Checkout & Warehousing Inventory
-* `POST /orders` — Checkout transaction with atomic stock reservation.
-* `GET /orders/my-orders` — Shopper personal transaction history.
-* `GET /orders/:orderId` — Order details.
-* `POST /orders/:orderId/pay` — Complete order payment transaction.
-* `POST /orders/:orderId/cancel` — Cancel order and release stock.
-* `GET /orders` — Administrative paginated orders directory.
-* `PATCH /orders/:orderId` — Update order details (tracking, billing, shipping address).
-* `PATCH /orders/:orderId/status` — State-machine status transitions (e.g. `CONFIRMED` $\to$ `SHIPPED` $\to$ `DELIVERED`).
-* `DELETE /orders/:orderId` — Soft-delete order from active indices.
-* `GET /inventory/:productId` — Stock query lookup.
-* `PATCH /inventory/:productId` — Manual warehouse stock override (Staff).
-
-### Domain 9: Granular Sales & Distribution Analytics
-* `GET /analytics/dashboard` — Overall analytics performance rollup.
-* `GET /analytics/revenue` — Revenue metrics over time.
-* `GET /analytics/top-products` — Top performing products array.
-* `GET /analytics/top-customers` — Top spending buyer accounts.
-* `GET /analytics/category-sales` — Sales margins by category path.
-* `GET /analytics/brand-sales` — Brand sales margin performance.
-* `GET /analytics/country-sales` — Country geographic splits.
-* `GET /analytics/state-sales` — State geographic splits.
-* `GET /analytics/city-sales` — City geographic splits.
-* `GET /analytics/payment-distribution` — Payment methods spread.
-* `GET /analytics/order-status` — Order status splits.
-* `GET /analytics/seller-performance` — Merchant performance metrics.
-
-### Domain 10 & 11: Enterprise Search & Admin Gateways
-* `GET /search/products` — High-speed typo-tolerant catalog keyword search.
-* `GET /search/orders` — Search orders by ID, tracking number, email, or phone.
-* `GET /admin/users` — Fetch all users in database paginated.
-* `GET /admin/system-metrics` — CPU, Memory usage, Node version, and DB latency.
-* `PATCH /admin/users/:userId/block` — Block user account.
-* `PATCH /admin/users/:userId/unblock` — Unblock user account.
+* **Identity Management**: `/auth/register`, `/auth/login`, `/auth/change-password`
+* **Products & Taxonomy**: `/products`, `/categories`, `/search/products`
+* **Orders & Checkout**: `/orders` (Two-phase commit), `/orders/:id/pay`, `/orders/:id/cancel`
+* **Inventory & Overrides**: `/inventory/:productId` (Atomic operations)
+* **Sales Intelligence**: `/analytics/revenue`, `/analytics/top-products`, `/analytics/category-sales`
 
 ---
 
-## ⚡ 5. Quick Boot & Installation Guide
+## ⚡ Quick Boot & Installation Guide
 
-To run the platform locally:
+To run the full-stack platform locally:
 
+### 1. Boot the Backend (API & Database)
 ```bash
-# 1. Clone this repository and navigate to the backend folder
 cd amazon_orders_raushan_kumar/backend
-
-# 2. Install all structured backend dependencies
 npm install
 
-# 3. Perform JSON-to-CSV Cloud Database Atlas Ingestion
+# Perform JSON-to-CSV Cloud Database Atlas Ingestion
 node src/seed/importDatasetCsv.js
 
-# 4. Boot up the Express HTTP server
+# Boot up the Express HTTP server (Runs on port 5001)
 npm start
 ```
 
-Your cloud-connected database is fully populated, and the platform is live and running at **`http://localhost:5001`**! 🚀
+### 2. Boot the Frontend (CartX UI)
+Open a new terminal window:
+```bash
+cd amazon_orders_raushan_kumar/frontend
+npm install
+
+# Boot the Vite React Application (Runs on port 5173)
+npm run dev
+```
+
+Your cloud-connected database is now fully populated, and the complete distributed system is live! 🚀
+
+---
+<div align="center">
+  <img src="https://images.unsplash.com/photo-1580828343064-fde4cad202d5?q=80&w=2070&auto=format&fit=crop" alt="Logistics and Commerce" width="100%" style="border-radius: 12px; margin-top: 20px; opacity: 0.8;" />
+  <p><em>Engineered for speed, scale, and uncompromising security.</em></p>
+</div>
