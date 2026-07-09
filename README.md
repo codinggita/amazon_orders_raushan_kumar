@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./docs/assets/cartx-hero.png" alt="CartX Platform Hero" width="100%" style="border-radius: 12px; margin-bottom: 20px;" />
+  <img src="./docs/assets/cartx-hero-v2.png" alt="CartX Platform Hero" width="100%" style="border-radius: 12px; margin-bottom: 20px;" />
   
   # 🛒 CartX - Premium E-Commerce Orchestration
 
