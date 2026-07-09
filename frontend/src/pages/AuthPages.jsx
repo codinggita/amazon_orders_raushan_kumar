@@ -3,8 +3,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as zod from 'zod';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, Eye, EyeOff, KeyRound, ShieldCheck, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, KeyRound, ShieldCheck, ArrowRight, ArrowLeft, Building2, Briefcase, Tag } from 'lucide-react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useAuthStore } from '../store/useAuthStore';
 import { useToast } from '../components/Toast';
 import api from '../services/api';
@@ -19,6 +20,32 @@ const registerSchema = zod.object({
   lastName: zod.string().min(1, 'Last name is required.'),
   email: zod.string().email('Please enter a valid email address.'),
   password: zod.string().min(8, 'Password must be at least 8 characters long.'),
+  role: zod.enum(['CUSTOMER', 'SELLER', 'STAFF']),
+  companyName: zod.string().optional(),
+  taxId: zod.string().optional(),
+  categoryFocus: zod.string().optional(),
+  staffRole: zod.enum(['ANALYTICS_MANAGER', 'INVENTORY_MANAGER']).optional(),
+  invitationCode: zod.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.role === 'SELLER') {
+    if (!data.companyName || data.companyName.trim() === '') {
+      ctx.addIssue({ code: zod.ZodIssueCode.custom, message: 'Company Name is required for sellers', path: ['companyName'] });
+    }
+    if (!data.taxId || data.taxId.trim() === '') {
+      ctx.addIssue({ code: zod.ZodIssueCode.custom, message: 'Tax ID is required for sellers', path: ['taxId'] });
+    }
+    if (!data.categoryFocus || data.categoryFocus.trim() === '') {
+      ctx.addIssue({ code: zod.ZodIssueCode.custom, message: 'Category Focus is required', path: ['categoryFocus'] });
+    }
+  }
+  if (data.role === 'STAFF') {
+    if (!data.staffRole) {
+      ctx.addIssue({ code: zod.ZodIssueCode.custom, message: 'Please select a specific staff role', path: ['staffRole'] });
+    }
+    if (!data.invitationCode || data.invitationCode.trim() === '') {
+      ctx.addIssue({ code: zod.ZodIssueCode.custom, message: 'Invitation Code is required for staff', path: ['invitationCode'] });
+    }
+  }
 });
 
 const forgotSchema = zod.object({
@@ -72,6 +99,10 @@ export const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-radial-gradient">
+      <Helmet>
+        <title>Sign In - CartX</title>
+        <meta name="description" content="Sign in to your CartX account to track orders and checkout." />
+      </Helmet>
       <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.4),rgba(0,0,0,0.8))] pointer-events-none" />
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
 
@@ -81,10 +112,10 @@ export const LoginPage = () => {
         className="w-full max-w-md relative z-10 glass-panel rounded-2xl p-8 shadow-2xl"
       >
         <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center mx-auto mb-4 border border-primary/30">
-            <ShieldCheck className="w-6 h-6 text-primary" />
-          </div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">Access Commerce Control</h2>
+          <Link to="/" className="block w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-primary/20 bg-[#0a110f] border border-primary flex items-center justify-center p-1 shrink-0 mx-auto mb-4 hover:scale-110 transition-transform cursor-pointer">
+            <img src="/cartx-logo.png" alt="CartX Logo" className="w-full h-full object-cover rounded-lg" />
+          </Link>
+          <h2 className="text-2xl font-bold text-white tracking-tight">Access Cart<span className="text-primary drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]">X</span> Control</h2>
           <p className="text-gray-400 text-sm mt-2">Enter credentials to log into your workspace</p>
         </div>
 
@@ -105,7 +136,7 @@ export const LoginPage = () => {
                 type="email"
                 {...register('email')}
                 className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all outline-none"
-                placeholder="example@commerce.com"
+                placeholder="example@cartx.com"
               />
             </div>
             {errors.email && (
@@ -152,7 +183,7 @@ export const LoginPage = () => {
         </form>
 
         <div className="mt-8 pt-6 border-t border-white/5 text-center text-sm text-gray-400">
-          New to Commerce?{' '}
+          New to Cart<span className="text-primary drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]">X</span>?{' '}
           <Link to="/register" className="text-primary hover:underline font-medium">Create shopper account</Link>
         </div>
       </motion.div>
@@ -165,9 +196,14 @@ export const RegisterPage = () => {
   const addToast = useToast((s) => s.addToast);
   const [loading, setLoading] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm({
-    resolver: zodResolver(registerSchema)
+  const { register, handleSubmit, watch, formState: { errors } } = useForm({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      role: 'CUSTOMER'
+    }
   });
+
+  const selectedRole = watch('role');
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -187,6 +223,10 @@ export const RegisterPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-radial-gradient">
+      <Helmet>
+        <title>Register - CartX</title>
+        <meta name="description" content="Create a new CartX shopper account." />
+      </Helmet>
       <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.4),rgba(0,0,0,0.8))] pointer-events-none" />
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
 
@@ -196,11 +236,11 @@ export const RegisterPage = () => {
         className="w-full max-w-md relative z-10 glass-panel rounded-2xl p-8 shadow-2xl"
       >
         <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center mx-auto mb-4 border border-primary/30">
-            <User className="w-6 h-6 text-primary" />
-          </div>
+          <Link to="/" className="block w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-primary/20 bg-[#0a110f] border border-primary flex items-center justify-center p-1 shrink-0 mx-auto mb-4 hover:scale-110 transition-transform cursor-pointer">
+            <img src="/cartx-logo.png" alt="CartX Logo" className="w-full h-full object-cover rounded-lg" />
+          </Link>
           <h2 className="text-2xl font-bold text-white tracking-tight">Create Shopper Account</h2>
-          <p className="text-gray-400 text-sm mt-2">Sign up for the Commerce Intelligence portal</p>
+          <p className="text-gray-400 text-sm mt-2">Sign up for the Cart<span className="text-primary drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]">X</span> portal</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -266,6 +306,135 @@ export const RegisterPage = () => {
               <span className="text-xs text-rose-500 mt-1 block font-medium">{errors.password.message}</span>
             )}
           </div>
+
+          <div>
+            <label className="block text-gray-300 text-xs font-semibold uppercase tracking-wider mb-2">Account Type</label>
+            <select
+              {...register('role')}
+              className="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-white text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all outline-none appearance-none"
+            >
+              <option value="CUSTOMER">Shopper (Customer)</option>
+              <option value="SELLER">Merchant (Seller)</option>
+              <option value="STAFF">Staff (Operations/Analytics)</option>
+            </select>
+            {errors.role && (
+              <span className="text-xs text-rose-500 mt-1 block font-medium">{errors.role.message}</span>
+            )}
+          </div>
+
+          <motion.div 
+            initial={false}
+            animate={{ height: selectedRole === 'SELLER' ? 'auto' : 0, opacity: selectedRole === 'SELLER' ? 1 : 0 }}
+            className="overflow-hidden space-y-4"
+          >
+            {selectedRole === 'SELLER' && (
+              <>
+                <div>
+                  <label className="block text-gray-300 text-xs font-semibold uppercase tracking-wider mb-2">Company Name</label>
+                  <div className="relative">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                      <Building2 className="w-4 h-4" />
+                    </span>
+                    <input
+                      type="text"
+                      {...register('companyName')}
+                      className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all outline-none"
+                      placeholder="Apex Audio Inc."
+                    />
+                  </div>
+                  {errors.companyName && (
+                    <span className="text-xs text-rose-500 mt-1 block font-medium">{errors.companyName.message}</span>
+                  )}
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-gray-300 text-xs font-semibold uppercase tracking-wider mb-2">Tax ID</label>
+                    <div className="relative">
+                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                        <Briefcase className="w-4 h-4" />
+                      </span>
+                      <input
+                        type="text"
+                        {...register('taxId')}
+                        className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all outline-none"
+                        placeholder="XX-XXXXXXX"
+                      />
+                    </div>
+                    {errors.taxId && (
+                      <span className="text-xs text-rose-500 mt-1 block font-medium">{errors.taxId.message}</span>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <label className="block text-gray-300 text-xs font-semibold uppercase tracking-wider mb-2">Category</label>
+                    <div className="relative">
+                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                        <Tag className="w-4 h-4" />
+                      </span>
+                      <select
+                        {...register('categoryFocus')}
+                        className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all outline-none appearance-none"
+                      >
+                        <option value="">Select...</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Fashion">Fashion</option>
+                        <option value="Home">Home & Kitchen</option>
+                        <option value="Beauty">Beauty</option>
+                        <option value="Sports">Sports</option>
+                      </select>
+                    </div>
+                    {errors.categoryFocus && (
+                      <span className="text-xs text-rose-500 mt-1 block font-medium">{errors.categoryFocus.message}</span>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </motion.div>
+
+          <motion.div 
+            initial={false}
+            animate={{ height: selectedRole === 'STAFF' ? 'auto' : 0, opacity: selectedRole === 'STAFF' ? 1 : 0 }}
+            className="overflow-hidden space-y-4"
+          >
+            {selectedRole === 'STAFF' && (
+              <>
+                <div>
+                  <label className="block text-gray-300 text-xs font-semibold uppercase tracking-wider mb-2">Staff Role</label>
+                  <select
+                    {...register('staffRole')}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-white text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all outline-none appearance-none"
+                  >
+                    <option value="">Select Role...</option>
+                    <option value="INVENTORY_MANAGER">Inventory Manager</option>
+                    <option value="ANALYTICS_MANAGER">Analytics Manager</option>
+                  </select>
+                  {errors.staffRole && (
+                    <span className="text-xs text-rose-500 mt-1 block font-medium">{errors.staffRole.message}</span>
+                  )}
+                </div>
+                
+                <div>
+                  <label className="block text-gray-300 text-xs font-semibold uppercase tracking-wider mb-2">Invitation Code</label>
+                  <div className="relative">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                      <KeyRound className="w-4 h-4" />
+                    </span>
+                    <input
+                      type="password"
+                      {...register('invitationCode')}
+                      className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all outline-none"
+                      placeholder="Enter access code"
+                    />
+                  </div>
+                  {errors.invitationCode && (
+                    <span className="text-xs text-rose-500 mt-1 block font-medium">{errors.invitationCode.message}</span>
+                  )}
+                </div>
+              </>
+            )}
+          </motion.div>
 
           <button
             type="submit"
